@@ -39,7 +39,7 @@ room['outside'].items= ['gold','silver','murr']
 # Main
 #
 
-decisions = ('n','s','e','w','q', 'l', 'i')
+decisions = ('n','s','e','w','q', 'i', 'take')
 # Make a new player object that is currently in the 'outside' room.
 player = Player("Player1", room["outside"])
 # Write a loop that:
@@ -50,13 +50,12 @@ while decision != 'q':
 # * Prints the current description (the textwrap module might be useful here).
     print(player.current_room.description)
 # * Waits for user input and decides what to do.
-    if( hasattr(player.current_room, 'items') and len(player.current_room.items) > 0 ):
-        print('Items in room:', ', '.join(player.current_room.items) )
-
-    decision = input("\nHow would you like to proceed?\n\n[n] North [s] South [e] East [w] West [l] Loot Items [i] Open Inventory [q] Quit\n\n")
-    while decision not in decisions:
+    if( len(player.current_room.items) ):
+        print(f'Items in room: {", ".join(player.current_room.items)}\n')
+    decision = input("\nHow would you like to proceed?\n\n[n] North [s] South [e] East [w] West \n[take <item-name1> <item-name2> ....] Take Item(s) [take all] Take All Items \n[i] Open Inventory \n[q] Quit Game\n\n")
+    while decision.split(' ')[0] not in decisions:
         print("\nPlease make a valid selection to proceed!")
-        decision = input("\n\n[n] North [s] South [e] East [w] West [l] Loot Items [i] Open Inventory [q] Quit\n\n")
+        decision = input("\n\n[n] North [s] South [e] East [w] West \n[take <item-name1> <item-name2> ...] Take Item(s) [take all] Take All Items\n[i] Open Inventory \n[q] Quit Game\n\n")
 # for e in room:
         # print("'{}' is the '{}' and is '{}'\n".format(e, room[e].name, room[e].description))
 #
@@ -67,23 +66,63 @@ while decision != 'q':
     print("\n")
     if(decision == 'q'):
         print("Goodbye!")
-    elif(decision == 'l'):
-        if( hasattr(player, 'inventory') ):
-            player.inventory.append(player.current_room.items)
+    elif(decision[:4] == 'take'):
+        grabList = decision.split(' ')
+        grabList.remove('take')
+        if( len(grabList) == 1 and grabList[0] == 'all'):
+            for x in player.current_room.items:
+                player.inventory.append(x)
+            player.current_room.items = []
+        elif( len(grabList) ):
+            i=0
+            while i < len(grabList):
+                if( grabList[i] in player.current_room.items ):
+                    player.inventory.append(grabList[i])
+                    player.current_room.items.remove(grabList[i])
+                else:
+                    print("This room does not have that item.")
+                i+=1
+            print("You now have:",', '.join(player.inventory), 'in your inventory\n')
         else:
-            player.inventory = player.current_room.items
-        player.current_room.items=[]
-        print("You now have:",', '.join(player.inventory), 'in your possession\n')
+            print("The room is empty!\n")
     elif(decision == 'i'):
-        if( hasattr(player, 'inventory') ):
+        if( len(player.inventory) ):
             print('You have:', ', '.join(player.inventory), '\n' )
+            while decision != 'c':
+                decision = input("[drop <item-name1> <item-name2>....] Drop Item(s),  [c] Close Inventory [q] Quit Game\n")
+                if( decision == 'c' ):
+                    break
+                if( decision == 'q' ):
+                    print("Goodbye!")
+                    exit()
+                if( decision[:4] == 'drop' ):
+                    dropList = decision.split(' ')
+                    dropList.remove('drop') 
+                    if( len(dropList) == 1 and dropList[0] == 'all'):
+                        for x in player.inventory:
+                            player.current_room.items.append(x)
+                        player.inventory=[]
+                    else:
+                        i=0
+                        while i < len(dropList):
+                            if( dropList[i] in player.inventory ):
+                                player.current_room.items.append(dropList[i])
+                                player.inventory.remove(dropList[i])
+                            else:
+                                print("You do not have that item.")
+                            i+=1
+                    if( len(player.inventory) ):
+                        print(f"You now have: {', '.join(player.inventory)} in your inventory\n")
+                    else:
+                        print(f"You now have no items in your inventory\n")
+                        decision = 'c'
         else:
             print("You are not carrying anything in your satchel of treasures.\n")
     else:
         move = decision+"_to"
         if hasattr(player.current_room, move):
             player.current_room=getattr(player.current_room, move)
-            print("\n")
+            print("\n\n")
         else:
             print("{} does not have a path in that direction.\n".format(player.current_room.name))
 exit()
