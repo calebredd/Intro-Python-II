@@ -1,25 +1,26 @@
 from room import Room
 from player import Player
+from item import Item
 
 # Declare all the rooms
 
 room = {
     'outside':  Room("Outside Cave Entrance",
-                     "North of you, the cave mount beckons"),
+                     "North of you, the cave mount beckons", []),
 
     'foyer':    Room("Foyer", """Dim light filters in from the south. Dusty
-passages run north and east."""),
+passages run north and east.""", []),
 
     'overlook': Room("Grand Overlook", """A steep cliff appears before you, falling
 into the darkness. Ahead to the north, a light flickers in
-the distance, but there is no way across the chasm."""),
+the distance, but there is no way across the chasm.""", []),
 
     'narrow':   Room("Narrow Passage", """The narrow passage bends here from west
-to north. The smell of gold permeates the air."""),
+to north. The smell of gold permeates the air.""", []),
 
     'treasure': Room("Treasure Chamber", """You've found the long-lost treasure
 chamber! Sadly, it has already been completely emptied by
-earlier adventurers. The only exit is to the south."""),
+earlier adventurers. The only exit is to the south.""", []),
 }
 
 
@@ -41,9 +42,15 @@ room['outside'].items= ['gold','silver','murr']
 
 decisions = ('n','s','e','w','q', 'i', 'take')
 # Make a new player object that is currently in the 'outside' room.
-player = Player("Player1", room["outside"])
+playerName = input("What is your name warrior?\n\n")
+player = Player(playerName, room["outside"])
+decision = input(f"Very well, {player.name}! You are about to embark on an adventure of great importance and many treasures, are you ready?\n\n[y] Yes [n] No [q] Quit\n") 
 # Write a loop that:
-decision = ''
+while (decision not in ['y','q']):
+    if( decision == 'n'):
+        decision = input(f"Have some courage, {player.name}! Come back when you're ready to face your fears. Stop wasting my time.\n\n\nOne year later...............\n\n\nAh, yes, you look familar are you ready to begin your quest? \n\n[y] Yes [n] No [q] Quit\n")
+    else:
+        decision = input("Quit dilly-dallying, make up your mind, lad! I haven't got all autumn. Make true, are you ready or not?\n\n\n[y] Yes [n] No [q] Quit\n")
 while decision != 'q':
 # * Prints the current room name
     print(player.current_room.name)
